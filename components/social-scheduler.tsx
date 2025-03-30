@@ -23,7 +23,7 @@ const INITIAL_POSTS = [
     content: "Excited to announce our new product line!",
     date: new Date(new Date().getFullYear(), new Date().getMonth(), 15),
     platform: "Twitter",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/placeholder.png",
     tags: ["important"]
   },
   {
@@ -32,7 +32,7 @@ const INITIAL_POSTS = [
     content: "Check out what we've been working on this week.",
     date: new Date(new Date().getFullYear(), new Date().getMonth(), 20),
     platform: "Instagram",
-    image: "/placeholder.svg?height=300&width=300",
+    image: "/placeholder.png",
     tags: ["important"]
 
   },

@@ -230,7 +230,7 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost, isA
               key={index}
               className={`min-h-[100px] p-1 border-r border-b relative ${
                 beforeToday ? "bg-white" : "bg-gray-50 text-gray-400"
-              } ${ isToday ? "bg-red-500" : "" }`}
+              } ${ isToday ? "bg-purple-500 opacity-50" : "" }`}
               onClick={() => handleDateSelect(date)}
             >
               <div className="text-right p-1">{date.getDate()}</div>

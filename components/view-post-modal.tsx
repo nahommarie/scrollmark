@@ -52,6 +52,9 @@ export function ViewPostModal({ isOpen, onClose, post, onUpdatePost, onDeletePos
     }
   }
 
+  const afterToday = (date: Date) => new Date(date.toDateString()) > new Date(new Date().toDateString());
+
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
@@ -82,7 +85,7 @@ export function ViewPostModal({ isOpen, onClose, post, onUpdatePost, onDeletePos
             {post.image && (
               <div className="mt-4">
                 <div className="relative h-[200px] w-full overflow-hidden rounded-md">
-                  <Image src={post.image || "/placeholder.svg"} alt="Post image" fill className="object-cover" />
+                  <Image src={post.image || "/placeholder.png"} alt="Post image" fill className="object-cover" />
                 </div>
               </div>
             )}
@@ -91,9 +94,10 @@ export function ViewPostModal({ isOpen, onClose, post, onUpdatePost, onDeletePos
               <Button variant="outline" onClick={onClose}>
                 Close
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
+              {/* only allow deleting events in the future */}
+              {afterToday(post.date) && (<Button variant="destructive" onClick={handleDelete}>
                 Delete
-              </Button>
+              </Button>)}
             </DialogFooter>
           </TabsContent>
 
@@ -140,7 +144,7 @@ export function ViewPostModal({ isOpen, onClose, post, onUpdatePost, onDeletePos
               <Label htmlFor="edit-image">Image URL (optional)</Label>
               <Input
                 id="edit-image"
-                value={image || ""}
+                src={image || ""}
                 onChange={(e) => setImage(e.target.value || null)}
                 placeholder="Enter image URL"
               />
@@ -150,9 +154,11 @@ export function ViewPostModal({ isOpen, onClose, post, onUpdatePost, onDeletePos
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleUpdate} className="bg-purple-600 hover:bg-purple-700">
+              {afterToday(post.date) && (
+                <Button onClick={handleUpdate} className="bg-purple-600 hover:bg-purple-700">
                 Update Post
               </Button>
+              )}
             </DialogFooter>
           </TabsContent>
         </Tabs>

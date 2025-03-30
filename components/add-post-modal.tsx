@@ -25,10 +25,23 @@ export function AddPostModal({ isOpen, onClose, onAddPost, selectedDate }: AddPo
   const [platform, setPlatform] = useState("Twitter")
   const [image, setImage] = useState<string | null>(null)
   const [tags, setTags] = useState<string[]>([])
+  const [contentFeedback, setContentFeedback] = useState<string>("")
+
+
+const onTestClick = async (content: string) => {
+  const rawResponse = await fetch("/api/chat", { method: 'POST', body: JSON.stringify({
+    content
+  })});
+
+  const res = await rawResponse.json();
+
+
+  setContentFeedback(res.response);
+}
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate) return
+    if (!selectedDate || !title || !content) return
 
     onAddPost({
       title,
@@ -45,6 +58,7 @@ export function AddPostModal({ isOpen, onClose, onAddPost, selectedDate }: AddPo
     setContent("")
     setPlatform("Twitter")
     setImage(null)
+    setContentFeedback("")
   }
 
   return (
@@ -76,6 +90,12 @@ export function AddPostModal({ isOpen, onClose, onAddPost, selectedDate }: AddPo
               required
               rows={4}
             />
+            <Button type="button" onClick={() => onTestClick(content)} disabled={!content.trim()}>Get content feedback</Button>
+            {!!contentFeedback && (
+              <div className="text-gray-400 text-sm">
+                {contentFeedback}
+                </div>
+            ) }
           </div>
 
           <div className="space-y-2">
@@ -107,7 +127,7 @@ export function AddPostModal({ isOpen, onClose, onAddPost, selectedDate }: AddPo
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+            <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={!title || !content || !platform}>
               Schedule Post
             </Button>
           </DialogFooter>

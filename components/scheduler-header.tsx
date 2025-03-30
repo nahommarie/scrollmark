@@ -25,7 +25,7 @@ export function SchedulerHeader({ onCreatePost }: SchedulerHeaderProps) {
 
         <Button className="bg-purple-600 hover:bg-purple-700" onClick={onCreatePost}>
           <Plus className="mr-2 h-4 w-4" />
-          Create Post
+          Log Offline Post
         </Button>
       </div>
     </div>
