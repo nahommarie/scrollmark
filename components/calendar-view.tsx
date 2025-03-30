@@ -109,7 +109,7 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost, isA
       if (tags.includes(newTag)) {
         // remove the tag
         return tags.filter(tag => tag !== newTag);
-      } else {
+      } else { 
         return [...tags, newTag]
       }
     })
