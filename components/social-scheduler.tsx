@@ -12,6 +12,7 @@ export type Post = {
   date: Date
   platform: string
   image: string | null
+  tags: string[]
 }
 
 // Sample data for scheduled posts
@@ -23,6 +24,7 @@ const INITIAL_POSTS = [
     date: new Date(new Date().getFullYear(), new Date().getMonth(), 15),
     platform: "Twitter",
     image: "/placeholder.svg?height=300&width=300",
+    tags: ["important"]
   },
   {
     id: "2",
@@ -31,6 +33,8 @@ const INITIAL_POSTS = [
     date: new Date(new Date().getFullYear(), new Date().getMonth(), 20),
     platform: "Instagram",
     image: "/placeholder.svg?height=300&width=300",
+    tags: ["important"]
+
   },
   {
     id: "3",
@@ -39,12 +43,20 @@ const INITIAL_POSTS = [
     date: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 5),
     platform: "LinkedIn",
     image: null,
+    tags: ["promotion"]
+
   },
 ]
 
 export function SocialScheduler() {
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS)
   const [activeTab, setActiveTab] = useState("scheduled")
+
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [selectedPost, setSelectedPost] = useState<Post | null>(null)
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+      const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
+      const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   // Function to add a new post
   const handleAddPost = (post: Omit<Post, "id">) => {
@@ -53,16 +65,22 @@ export function SocialScheduler() {
       id: Math.random().toString(36).substring(2, 9),
     }
     setPosts([...posts, newPost])
+    setIsAddModalOpen(false)
+    setSelectedPost(null)
   }
 
   // Function to update an existing post
   const handleUpdatePost = (updatedPost: Post) => {
-    setPosts(posts.map((post) => (post.id === updatedPost.id ? updatedPost : post)))
+    setPosts(posts.map((post) => (post.id === updatedPost.id ? updatedPost : post)));
+    setIsAddModalOpen(false)
+    setSelectedPost(null)
   }
 
   // Function to delete a post
   const handleDeletePost = (postId: string) => {
     setPosts(posts.filter((post) => post.id !== postId))
+    setIsAddModalOpen(false)
+    setSelectedPost(null)
   }
 
   return (
@@ -70,13 +88,16 @@ export function SocialScheduler() {
       <SchedulerHeader
         onCreatePost={() => {
           const today = new Date()
-          handleAddPost({
-            title: "New Post",
-            content: "",
-            date: today,
-            platform: "Twitter",
-            image: null,
-          })
+          // handleAddPost({
+          //   title: "New Post",
+          //   content: "",
+          //   date: today,
+          //   platform: "Twitter",
+          //   image: null,
+          // })
+          setSelectedDate(today)
+          setIsAddModalOpen(true)
+
         }}
       />
 
@@ -89,6 +110,18 @@ export function SocialScheduler() {
           onAddPost={handleAddPost}
           onUpdatePost={handleUpdatePost}
           onDeletePost={handleDeletePost}
+
+          isAddModalOpen={isAddModalOpen}
+          selectedPost={selectedPost}
+          isViewModalOpen={isViewModalOpen}
+          setIsAddModalOpen={setIsAddModalOpen}
+          setSelectedPost={setSelectedPost}
+          setIsViewModalOpen={setIsViewModalOpen}
+
+          currentMonth={currentMonth}
+          selectedDate={selectedDate}
+          setCurrentMonth={setCurrentMonth}
+          setSelectedDate={setSelectedDate}
         />
       </div>
     </div>

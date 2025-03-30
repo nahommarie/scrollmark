@@ -24,6 +24,7 @@ export function AddPostModal({ isOpen, onClose, onAddPost, selectedDate }: AddPo
   const [content, setContent] = useState("")
   const [platform, setPlatform] = useState("Twitter")
   const [image, setImage] = useState<string | null>(null)
+  const [tags, setTags] = useState<string[]>([])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,6 +36,8 @@ export function AddPostModal({ isOpen, onClose, onAddPost, selectedDate }: AddPo
       date: selectedDate,
       platform,
       image,
+
+      tags, // todo: incorporate
     })
 
     // Reset form

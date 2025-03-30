@@ -25,14 +25,28 @@ interface CalendarViewProps {
   onAddPost: (post: Omit<Post, "id">) => void
   onUpdatePost: (post: Post) => void
   onDeletePost: (postId: string) => void
+
+  isAddModalOpen: boolean;
+  selectedPost: Post | null
+  isViewModalOpen: boolean;
+  setIsAddModalOpen: (i: boolean) => void;
+  setSelectedPost: (i: Post | null) => void;
+  setIsViewModalOpen: (i: boolean) => void;
+
+  currentMonth: Date,
+  selectedDate: Date | null;
+  setCurrentMonth: (d: Date) => void;
+  setSelectedDate: (d: Date | null) => void;
 }
 
-export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost }: CalendarViewProps) {
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost, isAddModalOpen, selectedPost, isViewModalOpen, setIsAddModalOpen, setIsViewModalOpen, setSelectedPost, currentMonth, selectedDate, setCurrentMonth: setCurrentMonth, setSelectedDate }: CalendarViewProps) {
+  // const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
+  // const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  // const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  // const [selectedPost, setSelectedPost] = useState<Post | null>(null)
+  // const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [channel, setChannel] = useState<string | null>(null)
+  const [tags, setTags] = useState<string[]>([])
 
   const startDate = startOfMonth(currentMonth)
   const endDate = endOfMonth(currentMonth)
@@ -62,6 +76,13 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost }: C
 
   // Function to handle date selection
   const handleDateSelect = (date: Date) => {
+    // only allow dates after today, we are scheduling after all :)
+    const beforeToday = new Date(date.toDateString()) <= new Date(new Date().toDateString());
+    if (beforeToday) {
+      alert("Can only schedule in the future!")
+      return;
+    }
+
     setSelectedDate(date)
     setIsAddModalOpen(true)
   }
@@ -79,9 +100,41 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost }: C
     setIsAddModalOpen(false)
   }
 
+  const handleChannelUpdate = (newChannel: string) => {
+    setChannel(newChannel)
+  }
+
+  const handleTagUpdate = (newTag: string) => {
+    setTags(tags => {
+      if (tags.includes(newTag)) {
+        // remove the tag
+        return tags.filter(tag => tag !== newTag);
+      } else {
+        return [...tags, newTag]
+      }
+    })
+  }
+
+  const meetsFilters = (post: Post | null) => {
+    if (!post) return true;
+
+    if (channel) {
+      console.log(">>> 1")
+      return post.platform === channel
+    }
+
+    if (!!tags.length) {
+      console.log(">>> 2")
+
+      return post.tags.some(tag => tags.includes(tag))
+    }
+
+    return true;
+  }
+
   // Get posts for a specific day
   const getPostsForDay = (date: Date) => {
-    return posts.filter((post) => isSameDay(post.date, date))
+    return posts.filter((post) => isSameDay(post.date, date) && meetsFilters(post))
   }
 
   // Format date range for display
@@ -96,7 +149,8 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost }: C
       {/* Calendar Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="h-8">
+          <Button variant="outline" size="sm" className="h-8"
+          onClick={() => setCurrentMonth(new Date())}>
             Today
           </Button>
 
@@ -122,23 +176,10 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost }: C
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center">
-            <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-            <Select defaultValue="monthly">
-              <SelectTrigger className="h-8 w-[100px] text-xs">
-                <SelectValue placeholder="View" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           <div className="flex items-center">
             <Tag className="mr-2 h-4 w-4 text-muted-foreground" />
-            <Select defaultValue="all-tags">
+            <Select defaultValue="all-tags" onValueChange={(newTag) => handleTagUpdate(newTag)}>
               <SelectTrigger className="h-8 w-[100px] text-xs">
                 <SelectValue placeholder="Tags" />
               </SelectTrigger>
@@ -152,7 +193,7 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost }: C
 
           <div className="flex items-center">
             <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
-            <Select defaultValue="all-channels">
+            <Select defaultValue="all-channels" onValueChange={(newVal) => handleChannelUpdate(newVal)}>
               <SelectTrigger className="h-8 w-[120px] text-xs">
                 <SelectValue placeholder="Channels" />
               </SelectTrigger>
@@ -181,13 +222,15 @@ export function CalendarView({ posts, onAddPost, onUpdatePost, onDeletePost }: C
           const isCurrentMonth = isSameMonth(date, currentMonth)
           const postsForDay = getPostsForDay(date)
           const hasPost = postsForDay.length > 0
+          const beforeToday = new Date(date.toDateString()) > new Date(new Date().toDateString());
+          const isToday = date.setHours(0,0,0,0) == new Date().setHours(0,0,0,0)
 
           return (
             <div
               key={index}
               className={`min-h-[100px] p-1 border-r border-b relative ${
-                isCurrentMonth ? "bg-white" : "bg-gray-50 text-gray-400"
-              }`}
+                beforeToday ? "bg-white" : "bg-gray-50 text-gray-400"
+              } ${ isToday ? "bg-red-500" : "" }`}
               onClick={() => handleDateSelect(date)}
             >
               <div className="text-right p-1">{date.getDate()}</div>
